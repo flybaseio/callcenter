@@ -11,15 +11,13 @@ Client ACD
 - Deployable to Heroku.
 - Embeddable in Salesforce Open CTI.
 
-![TwilioSoftphone](http://uploadir.com/u/vepiqfxq)
-
 ##Features
 
 - Agent presence (ready/not ready buttons)
 - Twilio Queues
 - Automatic Call Distribution (ACD) - Delivering call from Twilio Queues to the longest availible agent
-- Twilio Client - delivery to calls in the broswer
-- Realtime notifications of calls in queue, ready agents
+- Twilio Client - delivery to calls in the browser
+- Real-time notifications of calls in queue, ready agents
 - Outbound calls, click2call from Salesforce
 - Hold
 - Mute
