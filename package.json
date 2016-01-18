@@ -1,33 +1,35 @@
 {
-	"name": "callcenter",
-	"version": "0.0.1",
-	"description": "Client ACD powered by Flybase, Twilio and Node.js",
-	"main": "app.js",
-	"repository": "https://github.com/flybaseio/callcenter",
-	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1"
-	},
-	"keywords": [
-		"twilio",
-		"data mcfly",
-		"flybase",
-		"twilio",
-		"sms"
-	],
-	"author": "Roger Stringer",
-	"license": "MIT",
-	"dependencies": {
-		"twilio": "~1.6.0",
-	   "ejs": "~0.8.5",
-		"express": "~3.4.8",
-		"flybase": "~1.5.2",
-		"node-buzz": "~1.1.0",
-		"moment": "~2.5.1",
-		"less-middleware": "~0.2.1-beta",
-		"body-parser" : "~1.4.2",
-		"method-override" : "~2.0.2"	
-	},
-	"engines": {
-		"node": "0.12"
-	}
+  "name": "callcenter",
+  "version": "0.0.1",
+  "description": "Client ACD powered by Flybase, Twilio and Node.js",
+  "main": "app.js",
+  "repository": "https://github.com/flybaseio/callcenter",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "twilio",
+    "data mcfly",
+    "flybase",
+    "twilio",
+    "sms"
+  ],
+  "author": "Roger Stringer",
+  "license": "MIT",
+  "dependencies": {
+    "bluebird": "3.1.1",
+    "body-parser": "~1.4.2",
+    "ejs": "~0.8.5",
+    "express": "~3.4.8",
+    "flybase": "1.6.3",
+    "less-middleware": "~0.2.1-beta",
+    "method-override": "~2.0.2",
+    "moment": "~2.5.1",
+    "node-buzz": "~1.1.0",
+    "q": "1.4.1",
+    "twilio": "~1.6.0"
+  },
+  "engines": {
+    "node": "0.12"
+  }
 }

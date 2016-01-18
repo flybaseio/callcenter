@@ -52,3 +52,9 @@ To get your configuration variables:
 ## To be continued
 
 The rest will be added as we finish the app :)
+
+---
+
+## Credits
+
+- Based on the original [client-acd](https://github.com/choppen5/client-acd) written by Charles Oppenheimer aka [choppen5](https://github.com/choppen5), but thanks to the use of Flybase and Node, greatly simplified. :)
