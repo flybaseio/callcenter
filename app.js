@@ -61,7 +61,7 @@ app.post('/dial', function (req, res) {
 		var dial_id = req.param('CallerID');
 	}
 	var twiml = new twilio.TwimlResponse();
-	resp.dial(phonenumber, { 
+	twiml.dial(phonenumber, { 
 		callerId:dial_id
 	});
 	console.log("Response text for /dial post = #", twiml);
@@ -82,6 +82,7 @@ app.post('/voice', function (req, res) {
 	var addtoq = 0;
 	var dialqueue = '';
 	
+	//	search for agent who has been set to `Ready` for the longest time and connect them to the caller...
 	getlongestidle( function( bestclient ){
 		if( bestclient ){
 			console.log("Routing incoming voice call to best agent = #", bestclient);
