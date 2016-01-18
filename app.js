@@ -68,7 +68,6 @@ app.post('/dial', function (req, res) {
 	res.writeHead(200, {
 		'Content-Type':'text/xml'
 	});
-	res.type('text/xml');
 	res.end( twiml.toString() );
 });
 
@@ -117,7 +116,6 @@ app.post('/voice', function (req, res) {
 		res.writeHead(200, {
 			'Content-Type':'text/xml'
 		});
-		res.type('text/xml');
 		res.end( twiml.toString() );
 	});
 });
@@ -148,7 +146,6 @@ app.post('/handledialcallstatus', function (req, res) {
 	res.writeHead(200, {
 		'Content-Type':'text/xml'
 	});
-	res.type('text/xml');
 	res.end( twiml.toString() );
 });
 
