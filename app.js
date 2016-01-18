@@ -55,18 +55,15 @@ agentsRef.on('get-ready-agents', function (data) {
 
 //	listen for outgoing calls
 app.post('/dial', function (req, res) {
-	var number = req.param('PhoneNumber');
+	var phonenumber = req.param('PhoneNumber');
 	var dial_id = config.twilio.fromNumber;
 	if( typeof req.param('CallerID') !== 'undefined' ){
 		var dial_id = req.param('CallerID');
 	}
 	var twiml = new twilio.TwimlResponse();
-	twiml.dial({
-		'callerId':dial_id
-	}, function(node) {
-		node.Number( number );
+	resp.dial(phonenumber, { 
+		callerId:dial_id
 	});
-
 	console.log("Response text for /dial post = #", twiml);
 	res.writeHead(200, {
 		'Content-Type':'text/xml'
