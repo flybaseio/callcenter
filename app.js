@@ -64,7 +64,7 @@ app.post('/dial', function (req, res) {
 	twiml.dial(phonenumber, { 
 		callerId:dial_id
 	});
-	console.log("Response text for /dial post = #", twiml);
+	console.log("Response text for /dial post = #", twiml.toString());
 	res.writeHead(200, {
 		'Content-Type':'text/xml'
 	});
@@ -96,7 +96,7 @@ app.post('/voice', function (req, res) {
 			twiml.say("Please wait for the next available agent",{
 				voice:'woman',
 				language:'en-gb'
-			}).enqeue( dialqueue );
+			}).redirect('/voice');
 		}else{
 			twiml.dial({
 				'timeout':'10',
@@ -111,7 +111,7 @@ app.post('/voice', function (req, res) {
 				'status': 'ringing'
 			});
 		}
-		console.log("Response text for /voice post = #", twiml);
+		console.log("Response text for /voice post = #", twiml.toString());
 	
 		res.writeHead(200, {
 			'Content-Type':'text/xml'
@@ -142,7 +142,7 @@ app.post('/handledialcallstatus', function (req, res) {
 	}else{
 		twiml.hangup();
 	}
-	console.log("Response text for /handledialcallstatus post = #", twiml);
+	console.log("Response text for /handledialcallstatus post = #", twiml.toString());
 	res.writeHead(200, {
 		'Content-Type':'text/xml'
 	});
@@ -229,7 +229,7 @@ function getlongestidle( callback ){
 	agentsRef.where({"status": "Ready"}).orderBy( {"readytime":-1} ).on('value',function( data ){
 		if( data.count() ){
 			var agent = data.first().value();
-			callback( agent );
+			callback( agent.client );
 		}
 	});
 }
