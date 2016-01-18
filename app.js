@@ -80,6 +80,7 @@ app.post('/voice', function (req, res) {
 
 	var addtoq = 0;
 	var dialqueue = '';
+	var client_name = '';
 	
 	//	search for agent who has been set to `Ready` for the longest time and connect them to the caller...
 	getlongestidle( function( bestclient ){
@@ -91,12 +92,12 @@ app.post('/voice', function (req, res) {
 		}
 	
 		var twiml = new twilio.TwimlResponse();
-		if( dialqueue != '' ){
+		if( client_name === '' ){
 			addtoq = 1;
 			twiml.say("Please wait for the next available agent",{
 				voice:'woman',
 				language:'en-gb'
-			}).redirect('/voice');
+			}).pause({ length:3 }).redirect('/voice');
 		}else{
 			twiml.dial({
 				'timeout':'10',
