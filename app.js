@@ -24,8 +24,39 @@ var client = twilio(config.twilio.sid, config.twilio.token);
 var flybase = require('flybase');
 var callsRef = flybase.init(config.flybase.app_name, "calls", config.flybase.api_key);
 var agentsRef = flybase.init(config.flybase.app_name, "agents", config.flybase.api_key);
+var queueid = '';
+var good2go = false;
 
 // backend routes =========================================================
+client.queues.list(function(err, data) {
+	var to_go = data.queues.length;
+    data.queues.forEach(function(queue) {
+		if( queue.friendlyName === config.twilio.queueName ){
+			queueid = queue.sid;
+			console.log( "Queueid = #" + queueid + " for #" +  config.twilio.queueName );
+			good2go = true;
+		}
+		to_go--;
+		if( to_go == 0 ){
+			good2go = true;
+		}
+    });
+});
+
+var qNag = function() {
+	if( good2go ){
+		if( queueid === '' ){
+			client.queues.create({
+				friendlyName: config.twilio.queueName
+			}, function(err, queue) {
+				queueid = queue.sid;
+			});	
+		}
+	}else{
+		setTimeout(qNag, 1500);		
+	}
+};
+setTimeout(qNag, 1500);
 
 // listen for events via Flybase...
 
@@ -89,11 +120,11 @@ app.post('/voice', function (req, res) {
 			var client_name = bestclient;
 		}else{
 			var dialqueue = queuename;
+			addtoq = 1;
 		}
 	
 		var twiml = new twilio.TwimlResponse();
-		if( client_name === '' ){
-			addtoq = 1;
+		if( addtoq ){
 			twiml.say("Please wait for the next available agent",{
 				voice:'woman',
 				language:'en-gb'
@@ -149,25 +180,6 @@ app.post('/handledialcallstatus', function (req, res) {
 	});
 	res.end( twiml.toString() );
 });
-
-
-/*
-var auth = express.basicAuth(config.un, config.pw);
-
-// route to handle all frontend requests, with a password to protect unauthorized access....
-app.get('/cc', auth, function(req, res) {
-	var capability = new twilio.Capability( config.twilio.sid, config.twilio.token );
-	capability.allowClientIncoming( 'Admin' );
-	capability.allowClientOutgoing( config.twilio.appid );
-    var token = capability.generate();
-
-	res.render('cc', {
-		token:token,
-		api_key:config.flybase.api_key,
-		app_name:config.flybase.app_name
-	});
-}); 
-*/
 
 // assign a twilio call token to the agent
 app.get('/token', function(req, res) {
