@@ -61,11 +61,11 @@ app.post('/dial', function (req, res) {
 		var dial_id = req.param('CallerID');
 	}
 	var twiml = new twilio.TwimlResponse();
-	twiml.dial( dial({
+	twiml.dial({
 		'callerId':dial_id
 	}, function(node) {
 		node.Number( number );
-	}));
+	});
 
 	console.log("Response text for /dial post = #", twiml);
 	res.writeHead(200, {
@@ -101,13 +101,13 @@ app.post('/voice', function (req, res) {
 				language:'en-gb'
 			}).enqeue( dialqueue );
 		}else{
-			twiml.dial( dial({
+			twiml.dial({
 				'timeout':'10',
 				'action':'/handledialcallstatus',
 				'callerId':callerid
 			}, function(node) {
 				this.client( client_name );
-			}));
+			});
 			update_call(sid, {
 				'sid': sid,
 				'agent': client_name,
