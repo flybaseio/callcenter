@@ -273,7 +273,7 @@ $(function() {
 			 $("#agent-status").addClass("ready");
 			 $('#softphone').removeClass('incoming');
 
-		 }
+		}
 
 		if (statusCategory == "notReady") {
 			 $("#agent-status-controls > button.ready").prop("disabled",false); 
@@ -281,7 +281,6 @@ $(function() {
 			 $("#agent-status").removeClass();
 			 $("#agent-status").addClass("not-ready");
 			 $('#softphone').removeClass('incoming');
-
 		}
 
 		if (statusCategory == "onCall") {
