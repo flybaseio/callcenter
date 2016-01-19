@@ -311,9 +311,10 @@ var checkQueue = function() {
 	var readyagents = 0;
 	var qname = config.twilio.queueName;
 	client.queues(queueid).get(function(err, queue) {
-		client.queues(queueid).members.list(function(err, members) {
-			qsize = queue.CurrentSize;
-			if( qsize > 0 ){
+		qsize = queue.CurrentSize;
+		console.log( 'There are #' + qsize + ' callers in the queue' );
+		if( qsize > 0 ){
+			client.queues(queueid).members.list(function(err, members) {
 				var topmember = members[0];
 				agentsRef.where({"status": "Ready"}).orderBy( {"readytime":-1} ).on('value',function( agents ){
 					if( agents.count() ){
@@ -334,13 +335,14 @@ var checkQueue = function() {
 					agentsRef.trigger('in-queue', qsize );
 	
 					// restart the check checking
-					setTimeout(checkQueue, 3500);		
+					setTimeout(checkQueue, 1500);		
 				});
-			}else{
-				// restart the check checking
-				setTimeout(checkQueue, 3500);		
-			}
-		});
+			});
+		}else{
+			// restart the check checking
+			console.log("No callers found during queue poll #" + qsum);
+			setTimeout(checkQueue, 1500);		
+		}
 	});	
 };
-	setTimeout(checkQueue, 3500);
+setTimeout(checkQueue, 1500);
