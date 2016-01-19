@@ -130,7 +130,7 @@ app.post('/voice', function (req, res) {
 			});
 			res.end('<Response>' +
 			' <Say>Please wait for the next available agent</Say>' +
-			' <Enqueue>' + config.twilio.queueName + '</Enqueue>' +
+			' <Enqueue waitUrl="http://s3.amazonaws.com/com.twilio.sounds.music/index.xml">' + config.twilio.queueName + '</Enqueue>' +
 			'</Response>');
 /*
 			twiml.say("Please wait for the next available agent",{
