@@ -334,6 +334,7 @@ var checkQueue = function() {
 
 				// restart the check checking
 				setTimeout(checkQueue, 2500);		
+			});
 		}else{
 			// restart the check checking
 			console.log("No callers found during queue poll #" + qsum);
