@@ -342,12 +342,12 @@ var checkQueue = function() {
 				agentsRef.trigger('in-queue', qsize );
 
 				// restart the check checking
-				setTimeout(checkQueue, 3500);		
+				setTimeout(checkQueue, 2500);		
 			});
 		}else{
 			// restart the check checking
 			console.log("No callers found during queue poll #" + qsum);
-			setTimeout(checkQueue, 3500);		
+			setTimeout(checkQueue, 2500);		
 		}
 	});	
 };
