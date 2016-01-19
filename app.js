@@ -119,7 +119,7 @@ app.post('/voice', function (req, res) {
 			twiml.say("Please wait for the next available agent",{
 				voice:'woman',
 				language:'en-gb'
-			}).pause({ length:3 }).redirect('/voice');
+			}).redirect('/voice');
 		}else{
 			twiml.dial({
 				'timeout':'10',
