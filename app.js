@@ -38,25 +38,16 @@ client.queues.list(function(err, data) {
 		}
 		to_go--;
 		if( to_go == 0 ){
-			good2go = true;
+			if( queueid === '' ){
+				client.queues.create({
+					friendlyName: config.twilio.queueName
+				}, function(err, queue) {
+					queueid = queue.sid;
+				});	
+			}
 		}
     });
 });
-
-var qNag = function() {
-	if( good2go ){
-		if( queueid === '' ){
-			client.queues.create({
-				friendlyName: config.twilio.queueName
-			}, function(err, queue) {
-				queueid = queue.sid;
-			});	
-		}
-	}else{
-		setTimeout(qNag, 1500);		
-	}
-};
-setTimeout(qNag, 1500);
 
 // listen for events via Flybase...
 
