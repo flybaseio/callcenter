@@ -311,8 +311,8 @@ var checkQueue = function() {
 	var readyagents = 0;
 	var qname = config.twilio.queueName;
 	client.queues(queueid).get(function(err, queue) {
-		qsize = queue.CurrentSize;
-		console.log( 'There are #' + qsize + ' callers in the queue' );
+		qsize = queue.currentSize;
+		console.log( 'There are #' + qsize + ' callers in the queue (' + queueid + ')' );
 		if( qsize > 0 ){
 			client.queues(queueid).members.list(function(err, members) {
 				var topmember = members[0];
