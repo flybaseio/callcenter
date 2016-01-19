@@ -244,11 +244,10 @@ var checkQueue = function() {
 	var readyagents = 0;
 	var qname = config.twilio.queueName;
 	client.queues(queueid).get(function(err, queue) {
-		client.queues(queueid).members.list(function(err, data) {
-			if( data.length ){
-				var members = data;
+		client.queues(queueid).members.list(function(err, members) {
+			qsize = queue.CurrentSize;
+			if( qsize > 0 ){
 				var topmember = members[0];
-				qsize = queue.CurrentSize;
 				agentsRef.where({"status": "Ready"}).orderBy( {"readytime":-1} ).on('value',function( agents ){
 					if( agents.count() ){
 						var readyagents = agents.count();
