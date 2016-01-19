@@ -122,17 +122,20 @@ app.post('/voice', function (req, res) {
 			var dialqueue = queuename;
 			addtoq = 1;
 		}
-	
+		var resString = '';
 		var twiml = new twilio.TwimlResponse();
 		if( addtoq ){
+			var resString = '<?xml version="1.0" encoding="UTF-8" ?>' + 
+			'<Response>' + 
+			'<Say>Please wait for the next available agent</Say>' + 
+			'<Enqueue waitUrl="wait-music.xml">' + config.twilio.queueName + '</Enqueue>' + 
+			'</Response>';
+/*
 			twiml.say("Please wait for the next available agent",{
 				voice:'woman',
 				language:'en-gb'
-			});
-			twiml.enqueue( 
-				{waitUrl: "http://s3.amazonaws.com/com.twilio.sounds.music/index.xml"},
-				config.twilio.queueName 
-			);	//	.pause({ length:3 }).redirect('/voice')
+			}).pause({ length:5 }).redirect('/voice')
+*/
 		}else{
 			twiml.dial({
 				'timeout':'10',
@@ -146,12 +149,13 @@ app.post('/voice', function (req, res) {
 				'agent': client_name,
 				'status': 'ringing'
 			});
+			var resString = twiml.toString();
 		}
 		res.writeHead(200, {
 			'Content-Type':'text/xml'
 		});
-		res.end( twiml.toString() );
-		console.log("Response text for /voice post = #", twiml.toString());
+		res.end( resString );
+		console.log("Response text for /voice post = #", resString);
 	});
 });
 
