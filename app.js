@@ -116,10 +116,10 @@ app.post('/voice', function (req, res) {
 		}
 		var twiml = new twilio.TwimlResponse();
 		if( addtoq ){
+			console.log("Adding #" + sid " to call queue #" + config.twilio.queueName);
 			twiml.say("Please wait for the next available agent",{
-				voice:'woman',
-				language:'en-gb'
-			}).pause({ length:5 }).redirect('/voice')
+				voice:'woman'
+			}).pause({ length:3 }).redirect('/voice');
 		}else{
 			twiml.dial({
 				'timeout':'10',
