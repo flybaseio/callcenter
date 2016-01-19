@@ -120,6 +120,7 @@ app.post('/voice', function (req, res) {
 			twiml.say("Please wait for the next available agent",{
 				voice:'woman'
 			}).pause({ length:3 }).redirect('/voice');
+			console.log("Response text for /voice post = #", twiml.toString());
 		}else{
 			twiml.dial({
 				'timeout':'10',
