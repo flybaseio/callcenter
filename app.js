@@ -245,30 +245,35 @@ var checkQueue = function() {
 	var qname = config.twilio.queueName;
 	client.queues(queueid).get(function(err, queue) {
 		client.queues(queueid).members.list(function(err, data) {
-			var members = data;
-			var topmember = members[0];
-			qsize = queue.CurrentSize;
-			agentsRef.where({"status": "Ready"}).orderBy( {"readytime":-1} ).on('value',function( agents ){
-				if( agents.count() ){
-					var readyagents = agents.count();
-					var bestclient = agents.first().value();
-					console.log("Found best client - routing to #" + bestclient.client + " - setting agent to DeQueuing status so they aren't sent another call from the queue");
-					update_agent(bestclient.client, {status: "DeQueing" });
-					client.queues(queueid).members(topmember.CallSid).update({
-						url: "/voice",
-						method: "POST"
-					}, function(err, member) {
-//						console.log(member.position);
-					});
-				}else{
-					console.log("No Ready agents during queue poll #" + qsum);
-				}
-				agentsRef.trigger('agents-ready', readyagents );
-				agentsRef.trigger('in-queue', qsize );
-
+			if( data.length ){
+				var members = data;
+				var topmember = members[0];
+				qsize = queue.CurrentSize;
+				agentsRef.where({"status": "Ready"}).orderBy( {"readytime":-1} ).on('value',function( agents ){
+					if( agents.count() ){
+						var readyagents = agents.count();
+						var bestclient = agents.first().value();
+						console.log("Found best client - routing to #" + bestclient.client + " - setting agent to DeQueuing status so they aren't sent another call from the queue");
+						update_agent(bestclient.client, {status: "DeQueing" });
+						client.queues(queueid).members(topmember.CallSid).update({
+							url: "/voice",
+							method: "POST"
+						}, function(err, member) {
+	//						console.log(member.position);
+						});
+					}else{
+						console.log("No Ready agents during queue poll #" + qsum);
+					}
+					agentsRef.trigger('agents-ready', readyagents );
+					agentsRef.trigger('in-queue', qsize );
+	
+					// restart the check checking
+					setTimeout(checkQueue, 3500);		
+				});
+			}else{
 				// restart the check checking
 				setTimeout(checkQueue, 3500);		
-			});
+			}
 		});
 	});	
 };
