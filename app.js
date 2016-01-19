@@ -329,7 +329,7 @@ var checkQueue = function() {
 					update_agent(bestclient.client, {status: "DeQueing" }, function(){
 						console.log('redirecting call now!');
 						client.queues(queueid).members("Front").update({
-							url: "/voice",
+							url: "http://callstand.herokuapp.com/voice",
 							method: "POST"
 						}, function(err, member) {
 //							console.log(member.position);
