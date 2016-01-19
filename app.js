@@ -114,7 +114,7 @@ app.post('/voice', function (req, res) {
 	var client_name = '';
 	
 	//	search for agent who has been set to `Ready` for the longest time and connect them to the caller...
-	getlongestidle( function( bestclient ){
+	getlongestidle(true, function( bestclient ){
 		if( bestclient ){
 			console.log("Routing incoming voice call to best agent = #", bestclient);
 			var client_name = bestclient;
@@ -128,7 +128,7 @@ app.post('/voice', function (req, res) {
 			twiml.say("Please wait for the next available agent",{
 				voice:'woman',
 				language:'en-gb'
-			}).pause({ length:3 }).redirect('/voice');
+			}).pause({ length:3 }).enqueue( dialqueue );	//	.redirect('/voice')
 		}else{
 			twiml.dial({
 				'timeout':'10',
@@ -235,16 +235,74 @@ var server = app.listen(port, function() {
 });
 
 
+// call queue handling =========================================================
+var qsum = 0;
+
+var checkQueue = function() {
+	qsum += 1;
+	var qsize = 0;
+	var readyagents = 0;
+	var qname = config.twilio.queueName;
+	client.queues(queueid).get(function(err, queue) {
+		client.queues(queueid).members.list(function(err, data) {
+			var members = data;
+			var topmember = members[0];
+			qsize = queue.CurrentSize;
+			agentsRef.where({"status": "Ready"}).orderBy( {"readytime":-1} ).on('value',function( agents ){
+				if( agents.count() ){
+					var readyagents = agents.count();
+					var bestclient = agents.first().value();
+					console.log("Found best client - routing to #" + bestclient.client + " - setting agent to DeQueuing status so they aren't sent another call from the queue");
+					update_agent(bestclient.client, {status: "DeQueing" });
+					client.queues(queueid).members(topmember.CallSid).update({
+						url: "/voice",
+						method: "POST"
+					}, function(err, member) {
+//						console.log(member.position);
+					});
+				}else{
+					console.log("No Ready agents during queue poll #" + qsum);
+				}
+				agentsRef.trigger('agents-ready', readyagents );
+				agentsRef.trigger('in-queue', qsize );
+
+				// restart the check checking
+				setTimeout(checkQueue, 3500);		
+			});
+		});
+	});	
+};
+setTimeout(checkQueue, 3500);
+
+
+
 // various functions =========================================================
 
 //	find the caller who's been `Ready` the longest
-function getlongestidle( callback ){
-	agentsRef.where({"status": "Ready"}).orderBy( {"readytime":-1} ).on('value',function( data ){
-		if( data.count() ){
-			var agent = data.first().value();
-			callback( agent.client );
-		}
-	});
+function getlongestidle( callrouting, callback ){
+	if( callrouting ){
+		agentsRef.where({"status": "DeQueuing"}).orderBy( {"readytime":-1} ).on('value',function( data ){
+			if( data.count() ){
+				var agent = data.first().value();
+				callback( agent.client );
+			}else{
+				agentsRef.where({"status": "Ready"}).orderBy( {"readytime":-1} ).on('value',function( data ){
+					if( data.count() ){
+						var agent = data.first().value();
+						callback( agent.client );
+					}
+				});
+			}
+		});
+
+	}else{
+		agentsRef.where({"status": "Ready"}).orderBy( {"readytime":-1} ).on('value',function( data ){
+			if( data.count() ){
+				var agent = data.first().value();
+				callback( agent.client );
+			}
+		});
+	}
 }
 
 
