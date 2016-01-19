@@ -261,9 +261,10 @@ function getlongestidle( callrouting, callback ){
 
 
 // check if user exists and if they do then we update, otherwise we insert...
-function update_agent(client, data){
+function update_agent(client, data, cb){
 	var d = new Date();
 	var date = d.toLocaleString();
+	var callback = cb || null;
 	agentsRef.where({"client": client}).on('value',function( rec ){
 		if( rec.count() !== null ){
 			var agent = rec.first().value();
@@ -272,11 +273,17 @@ function update_agent(client, data){
 			}
 			agentsRef.push(agent, function(resp) {
 				console.log( "agent updated" );
+				if( callback !== null ){
+					callback();
+				}
 			});				
 		}else{
 			data.client = client;
 			agentsRef.push(data, function(resp) {
 				console.log( "agent inserted" );
+				if( callback !== null ){
+					callback();
+				}
 			});				
 		}
 	});
@@ -319,12 +326,13 @@ var checkQueue = function() {
 					var readyagents = agents.count();
 					var bestclient = agents.first().value();
 					console.log("Found best client - routing to #" + bestclient.client + " - setting agent to DeQueuing status so they aren't sent another call from the queue");
-					update_agent(bestclient.client, {status: "DeQueing" });
-					client.queues(queueid).members("Front").update({
-						url: "/voice",
-						method: "POST"
-					}, function(err, member) {
-//						console.log(member.position);
+					update_agent(bestclient.client, {status: "DeQueing" }, function(){
+						client.queues(queueid).members("Front").update({
+							url: "/voice",
+							method: "POST"
+						}, function(err, member) {
+//							console.log(member.position);
+						});
 					});
 				}else{
 					console.log("No Ready agents during queue poll #" + qsum);
@@ -333,12 +341,12 @@ var checkQueue = function() {
 				agentsRef.trigger('in-queue', qsize );
 
 				// restart the check checking
-				setTimeout(checkQueue, 2500);		
+				setTimeout(checkQueue, 3500);		
 			});
 		}else{
 			// restart the check checking
 			console.log("No callers found during queue poll #" + qsum);
-			setTimeout(checkQueue, 2500);		
+			setTimeout(checkQueue, 3500);		
 		}
 	});	
 };
