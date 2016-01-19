@@ -314,31 +314,26 @@ var checkQueue = function() {
 		qsize = queue.currentSize;
 		console.log( 'There are #' + qsize + ' callers in the queue (' + queueid + ')' );
 		if( qsize > 0 ){
-			client.queues(queueid).members.list(function(err, members) {
-				var topmember = members[0];
-console.log( topmember );
-				agentsRef.where({"status": "Ready"}).orderBy( {"readytime":-1} ).on('value',function( agents ){
-					if( agents.count() ){
-						var readyagents = agents.count();
-						var bestclient = agents.first().value();
-						console.log("Found best client - routing to #" + bestclient.client + " - setting agent to DeQueuing status so they aren't sent another call from the queue");
-						update_agent(bestclient.client, {status: "DeQueing" });
-						client.queues(queueid).members(topmember.CallSid).update({
-							url: "/voice",
-							method: "POST"
-						}, function(err, member) {
-	//						console.log(member.position);
-						});
-					}else{
-						console.log("No Ready agents during queue poll #" + qsum);
-					}
-					agentsRef.trigger('agents-ready', readyagents );
-					agentsRef.trigger('in-queue', qsize );
-	
-					// restart the check checking
-					setTimeout(checkQueue, 2500);		
-				});
-			});
+			agentsRef.where({"status": "Ready"}).orderBy( {"readytime":-1} ).on('value',function( agents ){
+				if( agents.count() ){
+					var readyagents = agents.count();
+					var bestclient = agents.first().value();
+					console.log("Found best client - routing to #" + bestclient.client + " - setting agent to DeQueuing status so they aren't sent another call from the queue");
+					update_agent(bestclient.client, {status: "DeQueing" });
+					client.queues(queueid)members("Front").update({
+						url: "/voice",
+						method: "POST"
+					}, function(err, member) {
+//						console.log(member.position);
+					});
+				}else{
+					console.log("No Ready agents during queue poll #" + qsum);
+				}
+				agentsRef.trigger('agents-ready', readyagents );
+				agentsRef.trigger('in-queue', qsize );
+
+				// restart the check checking
+				setTimeout(checkQueue, 2500);		
 		}else{
 			// restart the check checking
 			console.log("No callers found during queue poll #" + qsum);
