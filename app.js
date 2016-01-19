@@ -106,7 +106,7 @@ app.post('/voice', function (req, res) {
 	var client_name = '';
 	
 	//	search for agent who has been set to `Ready` for the longest time and connect them to the caller...
-	getlongestidle(true, function( bestclient ){
+	getlongestidle(false, function( bestclient ){
 		if( bestclient ){
 			console.log("Routing incoming voice call to best agent = #", bestclient);
 			var client_name = bestclient;
