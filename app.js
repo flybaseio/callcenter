@@ -316,6 +316,7 @@ var checkQueue = function() {
 		if( qsize > 0 ){
 			client.queues(queueid).members.list(function(err, members) {
 				var topmember = members[0];
+console.log( topmember );
 				agentsRef.where({"status": "Ready"}).orderBy( {"readytime":-1} ).on('value',function( agents ){
 					if( agents.count() ){
 						var readyagents = agents.count();
@@ -335,13 +336,13 @@ var checkQueue = function() {
 					agentsRef.trigger('in-queue', qsize );
 	
 					// restart the check checking
-					setTimeout(checkQueue, 1500);		
+					setTimeout(checkQueue, 2500);		
 				});
 			});
 		}else{
 			// restart the check checking
 			console.log("No callers found during queue poll #" + qsum);
-			setTimeout(checkQueue, 1500);		
+			setTimeout(checkQueue, 2500);		
 		}
 	});	
 };
