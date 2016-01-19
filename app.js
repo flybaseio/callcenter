@@ -327,6 +327,7 @@ var checkQueue = function() {
 					var bestclient = agents.first().value();
 					console.log("Found best client - routing to #" + bestclient.client + " - setting agent to DeQueuing status so they aren't sent another call from the queue");
 					update_agent(bestclient.client, {status: "DeQueing" }, function(){
+						console.log('redirecting call now!');
 						client.queues(queueid).members("Front").update({
 							url: "/voice",
 							method: "POST"
