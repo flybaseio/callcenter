@@ -7,7 +7,8 @@ module.exports = {
 		fromNumber : "778-760-1619",
 		welcome : "Thank you for calling.",
 		hangup : false,
-		queueName: "cnacd"
+		queueName: "cnacd",
+		dqueueurl:"http://callstand.herokuapp.com/voice"
 	},
 	//	Flybase settings
 	flybase: {
