@@ -38,17 +38,25 @@ client.queues.list(function(err, data) {
 		}
 		to_go--;
 		if( to_go == 0 ){
-			if( queueid === '' ){
-				client.queues.create({
-					friendlyName: config.twilio.queueName
-				}, function(err, queue) {
-					queueid = queue.sid;
-					console.log( "[Created] Queueid = #" + queueid + " for #" +  config.twilio.queueName );
-				});	
-			}
+			good2go = true;
 		}
     });
 });
+
+var qNag = function() {
+	if( good2go ){
+		if( queueid === '' ){
+			client.queues.create({
+				friendlyName: config.twilio.queueName
+			}, function(err, queue) {
+				queueid = queue.sid;
+			});	
+		}
+	}else{
+		setTimeout(qNag, 1500);		
+	}
+};
+setTimeout(qNag, 1500);
 
 // listen for events via Flybase...
 
@@ -106,7 +114,7 @@ app.post('/voice', function (req, res) {
 	var client_name = '';
 	
 	//	search for agent who has been set to `Ready` for the longest time and connect them to the caller...
-	getlongestidle(false, function( bestclient ){
+	getlongestidle( function( bestclient ){
 		if( bestclient ){
 			console.log("Routing incoming voice call to best agent = #", bestclient);
 			var client_name = bestclient;
@@ -114,13 +122,13 @@ app.post('/voice', function (req, res) {
 			var dialqueue = queuename;
 			addtoq = 1;
 		}
+	
 		var twiml = new twilio.TwimlResponse();
 		if( addtoq ){
-			console.log("Adding #" + sid + " to call queue #" + config.twilio.queueName);
 			twiml.say("Please wait for the next available agent",{
-				voice:'woman'
+				voice:'woman',
+				language:'en-gb'
 			}).pause({ length:3 }).redirect('/voice');
-			console.log("Response text for /voice post = #", twiml.toString());
 		}else{
 			twiml.dial({
 				'timeout':'10',
@@ -135,11 +143,12 @@ app.post('/voice', function (req, res) {
 				'status': 'ringing'
 			});
 		}
+		console.log("Response text for /voice post = #", twiml.toString());
+	
 		res.writeHead(200, {
 			'Content-Type':'text/xml'
 		});
 		res.end( twiml.toString() );
-		console.log("Response text for /voice post = #", twiml.toString());
 	});
 });
 
@@ -225,33 +234,17 @@ var server = app.listen(port, function() {
 	console.log('Listening on port %d', server.address().port);
 });
 
+
 // various functions =========================================================
 
 //	find the caller who's been `Ready` the longest
-function getlongestidle( callrouting, callback ){
-	if( callrouting ){
-		agentsRef.where({"status": "DeQueuing"}).orderBy( {"readytime":-1} ).on('value',function( data ){
-			if( data.count() ){
-				var agent = data.first().value();
-				callback( agent.client );
-			}else{
-				agentsRef.where({"status": "Ready"}).orderBy( {"readytime":-1} ).on('value',function( data ){
-					if( data.count() ){
-						var agent = data.first().value();
-						callback( agent.client );
-					}
-				});
-			}
-		});
-
-	}else{
-		agentsRef.where({"status": "Ready"}).orderBy( {"readytime":-1} ).on('value',function( data ){
-			if( data.count() ){
-				var agent = data.first().value();
-				callback( agent.client );
-			}
-		});
-	}
+function getlongestidle( callback ){
+	agentsRef.where({"status": "Ready"}).orderBy( {"readytime":-1} ).on('value',function( data ){
+		if( data.count() ){
+			var agent = data.first().value();
+			callback( agent.client );
+		}
+	});
 }
 
 
@@ -297,47 +290,3 @@ function update_call(sid, data){
 		}
 	});
 }
-
-// call queue handling =========================================================
-var qsum = 0;
-/*
-var checkQueue = function() {
-	qsum += 1;
-	var qsize = 0;
-	var readyagents = 0;
-	var qname = config.twilio.queueName;
-	client.queues(queueid).get(function(err, queue) {
-		client.queues(queueid).members.list(function(err, members) {
-			qsize = queue.CurrentSize;
-			if( qsize > 0 ){
-				var topmember = members[0];
-				agentsRef.where({"status": "Ready"}).orderBy( {"readytime":-1} ).on('value',function( agents ){
-					if( agents.count() ){
-						var readyagents = agents.count();
-						var bestclient = agents.first().value();
-						console.log("Found best client - routing to #" + bestclient.client + " - setting agent to DeQueuing status so they aren't sent another call from the queue");
-						update_agent(bestclient.client, {status: "DeQueing" });
-						client.queues(queueid).members(topmember.CallSid).update({
-							url: "/voice",
-							method: "POST"
-						}, function(err, member) {
-	//						console.log(member.position);
-						});
-					}else{
-						console.log("No Ready agents during queue poll #" + qsum);
-					}
-					agentsRef.trigger('agents-ready', readyagents );
-					agentsRef.trigger('in-queue', qsize );
-	
-					// restart the check checking
-					setTimeout(checkQueue, 3500);		
-				});
-			}else{
-				// restart the check checking
-				setTimeout(checkQueue, 3500);		
-			}
-		});
-	});	
-};
-//	setTimeout(checkQueue, 3500);
-*/
