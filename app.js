@@ -231,7 +231,7 @@ var server = app.listen(port, function() {
 //	find the caller who's been `Ready` the longest
 function getlongestidle( callrouting, callback ){
 	if( callrouting ){
-		agentsRef.where({"status": "DeQueuing"}).orderBy( {"readytime":-1} ).on('value',function( data ){
+		agentsRef.where({"status": "DeQueing"}).orderBy( {"readytime":-1} ).on('value',function( data ){
 			if( data.count() ){
 				var agent = data.first().value();
 				callback( agent.client );
