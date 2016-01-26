@@ -1,19 +1,19 @@
 module.exports = {
 	// Twilio API keys
 	twilio: {
-		sid: "ACad7f2667cf30801764096247be3749b3",
-		token: "ec8c4cabbc5d0dd8264ce0c97c30302a",
-		appid: 'AP5badab894aedf66f82ac0b7a86ac9ad5',
-		fromNumber : "778-760-1619",
+		sid: "ACCOUNT-SID",
+		token: "AUTH-TOKEN",
+		appid: 'APP-ID',
+		fromNumber : "TWILIO-NUMBER",
 		welcome : "Thank you for calling.",
 		hangup : false,
 		queueName: "cnacd",
-		dqueueurl:"http://callstand.herokuapp.com/voice"
+		dqueueurl:"http://yourwebsite.com/voice"
 	},
 	//	Flybase settings
 	flybase: {
-		api_key: "d2fdc676-f7a1-4640-8d36-376cec20eb75",
-		app_name: "clientacd"
+		api_key: "YOUR-API-KEY",
+		app_name: "YOUR-FLYBASE-APP"
 	},
 	//	Username and password for admin section.
 	un: 'admin',

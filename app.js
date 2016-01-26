@@ -231,30 +231,23 @@ var server = app.listen(port, function() {
 //	find the caller who's been `Ready` the longest
 function getlongestidle( callrouting, callback ){
 	if( callrouting ){
-		agentsRef.where({"status": "DeQueing"}).orderBy( {"readytime":-1} ).on('value',function( data ){
-			if( data.count() ){
+		agentsRef.where({"status": "DeQueing"}).orderBy( {"readytime":-1} ).on('value').then(function( data ){
+			var agent = data.first().value();
+			callback( agent.client );
+		},function(err){
+			agentsRef.where({"status": "Ready"}).orderBy( {"readytime":-1} ).on('value').then(function( data ){
 				var agent = data.first().value();
 				callback( agent.client );
-			}else{
-				agentsRef.where({"status": "Ready"}).orderBy( {"readytime":-1} ).on('value',function( data ){
-					if( data.count() ){
-						var agent = data.first().value();
-						callback( agent.client );
-					}else{
-						callback( false );
-					}
-				});
-			}
-		});
-
-	}else{
-		agentsRef.where({"status": "Ready"}).orderBy( {"readytime":-1} ).on('value',function( data ){
-			if( data.count() ){
-				var agent = data.first().value();
-				callback( agent.client );
-			}else{
+			},function(err){
 				callback( false );
-			}
+			});
+		});
+	}else{
+		agentsRef.where({"status": "Ready"}).orderBy( {"readytime":-1} ).on('value').then(function( data ){
+			var agent = data.first().value();
+			callback( agent.client );
+		},function(err){
+			callback( false );
 		});
 	}
 }
