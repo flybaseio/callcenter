@@ -21,7 +21,7 @@
     "body-parser": "~1.4.2",
     "ejs": "~0.8.5",
     "express": "~3.4.8",
-    "flybase": "1.6.3",
+    "flybase": "1.7.2",
     "less-middleware": "~0.2.1-beta",
     "method-override": "~2.0.2",
     "moment": "~2.5.1",

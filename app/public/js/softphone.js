@@ -89,23 +89,21 @@ $(function() {
 	SP.functions.update_agent = function(client, data){
 		var d = new Date();
 		var date = d.toLocaleString();
-		SP.agentsRef.where({"client": client}).on('value',function( rec ){
-			if( rec.count() !== null ){
-				var agent = rec.first().value();
-				for( var i in data ){
-					agent[i] = data[i];
-				}
-				SP.agent = agent;
-				SP.agentsRef.push(agent, function(resp) {
-					console.log( "agent updated" );
-				});				
-			}else{
-				data.client = client;
-				SP.agent = data;
-				SP.agentsRef.push(data, function(resp) {
-					console.log( "agent inserted" );
-				});				
+		SP.agentsRef.where({"client": client}).once('value').then(function( rec ){
+			var agent = rec.first().value();
+			for( var i in data ){
+				agent[i] = data[i];
 			}
+			SP.agent = agent;
+			SP.agentsRef.push(agent, function(resp) {
+				console.log( "agent updated" );
+			});				
+		}, function(err){
+			data.client = client;
+			SP.agent = data;
+			SP.agentsRef.push(data, function(resp) {
+				console.log( "agent inserted" );
+			});				
 		});
 	}
 

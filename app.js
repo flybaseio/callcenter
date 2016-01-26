@@ -265,48 +265,44 @@ function update_agent(client, data, cb){
 	var d = new Date();
 	var date = d.toLocaleString();
 	var callback = cb || null;
-	agentsRef.where({"client": client}).on('value',function( rec ){
-		if( rec.count() !== null ){
-			var agent = rec.first().value();
-			for( var i in data ){
-				agent[i] = data[i];
-			}
-			agentsRef.push(agent, function(resp) {
-				console.log( "agent updated" );
-				if( callback !== null ){
-					callback();
-				}
-			});				
-		}else{
-			data.client = client;
-			agentsRef.push(data, function(resp) {
-				console.log( "agent inserted" );
-				if( callback !== null ){
-					callback();
-				}
-			});				
+	agentsRef.where({"client": client}).once('value').then( function( rec ){
+		var agent = rec.first().value();
+		for( var i in data ){
+			agent[i] = data[i];
 		}
+		agentsRef.push(agent, function(resp) {
+			console.log( "agent updated" );
+			if( callback !== null ){
+				callback();
+			}
+		});
+	},function(err){
+		data.client = client;
+		agentsRef.push(data, function(resp) {
+			console.log( "agent inserted" );
+			if( callback !== null ){
+				callback();
+			}
+		});
 	});
 }
 
 function update_call(sid, data){
 	var d = new Date();
 	var date = d.toLocaleString();
-	callsRef.where({"sid": sid}).on('value',function( rec ){
-		if( rec.count() !== null ){
-			var call = rec.first().value();
-			for( var i in data ){
-				call[i] = data[i];
-			}
-			callsRef.push(call, function(resp) {
-				console.log( "call updated" );
-			});				
-		}else{
-			data.sid = sid;
-			callsRef.push(data, function(resp) {
-				console.log( "call inserted" );
-			});				
+	callsRef.where({"sid": sid}).on('value').then( function( rec ){
+		var call = rec.first().value();
+		for( var i in data ){
+			call[i] = data[i];
 		}
+		callsRef.push(call, function(resp) {
+			console.log( "call updated" );
+		});				
+	},function(err){
+		data.sid = sid;
+		callsRef.push(data, function(resp) {
+			console.log( "call inserted" );
+		});				
 	});
 }
 
@@ -321,33 +317,31 @@ var checkQueue = function() {
 		qsize = queue.currentSize;
 		console.log( 'There are #' + qsize + ' callers in the queue (' + queueid + ')' );
 		if( qsize > 0 ){
-			agentsRef.where({"status": "Ready"}).orderBy( {"readytime":-1} ).on('value',function( agents ){
-				if( agents.count() ){
-					var readyagents = agents.count();
-					var bestclient = agents.first().value();
-					console.log("Found best client - routing to #" + bestclient.client + " - setting agent to DeQueuing status so they aren't sent another call from the queue");
-					update_agent(bestclient.client, {status: "DeQueing" }, function(){
-						console.log('redirecting call now!');
-						client.queues(queueid).members("Front").update({
-							url: config.twilio.dqueueurl,
-							method: "POST"
-						}, function(err, member) {
+			agentsRef.where({"status": "Ready"}).orderBy( {"readytime":-1} ).on('value').then(function( agents ){
+				var readyagents = agents.count();
+				var bestclient = agents.first().value();
+				console.log("Found best client - routing to #" + bestclient.client + " - setting agent to DeQueuing status so they aren't sent another call from the queue");
+				update_agent(bestclient.client, {status: "DeQueing" }, function(){
+					console.log('redirecting call now!');
+					client.queues(queueid).members("Front").update({
+						url: config.twilio.dqueueurl,
+						method: "POST"
+					}, function(err, member) {
 //							console.log(member.position);
-						});
 					});
-				}else{
-					console.log("No Ready agents during queue poll #" + qsum);
-				}
-				agentsRef.trigger('agents-ready', readyagents );
-				agentsRef.trigger('in-queue', qsize );
-
-				// restart the check checking
-				setTimeout(checkQueue, 2500);		
+				});
+			},function(err){
+				console.log("No Ready agents during queue poll #" + qsum);
 			});
+			agentsRef.trigger('agents-ready', readyagents );
+			agentsRef.trigger('in-queue', qsize );
+
+			// restart the check checking
+			setTimeout(checkQueue, 3000);		
 		}else{
 			// restart the check checking
 			console.log("No callers found during queue poll #" + qsum);
-			setTimeout(checkQueue, 2500);		
+			setTimeout(checkQueue, 3000);		
 		}
 	});	
 };
