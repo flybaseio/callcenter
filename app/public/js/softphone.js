@@ -78,7 +78,6 @@ $(function() {
 			$("#team-status .queues-num").text( data);
 		});
 
-//		$(window).bind("beforeunload", function() { 
 		SP.agentsRef.onDisconnect( function(){
 			// if agent gets disconnected for any reason, then we want to kick them offline...
 			SP.agentsRef.trigger('agent-removed',{username: SP.username});
@@ -534,7 +533,6 @@ $(function() {
 
 
 	function saveLog(response) {
-/*			
 		console.log("saving log result, response:");
 		var result = JSON.parse(response.result);
 
@@ -568,6 +566,5 @@ $(function() {
 		
 		console.log("save params = " + saveParams);
 		sforce.interaction.saveLog('Task', saveParams, saveLogcallback);
-*/
 	}
 });
